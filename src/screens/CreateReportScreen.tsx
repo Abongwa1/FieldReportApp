@@ -6,7 +6,11 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  Alert,
 } from "react-native";
+import { getDBConnection } from "../database/connection";
+import { createReport } from "../repositories/reportRepository";
+import { NavigationContainer } from "@react-navigation/native";
 
 export default function CreateReportScreen() {
   const [title, setTitle] = useState("");
@@ -17,6 +21,18 @@ export default function CreateReportScreen() {
     "https://images.unsplash.com/photo-1503387762-592deb58ef4e",
     "https://images.unsplash.com/photo-1503387762-592deb58ef4e",
   ];
+
+  const handleSave = async () => {
+  const db = await getDBConnection();
+
+  await createReport(db, {
+    title,
+    description,
+    status: "Pending",
+  });
+
+  Alert.alert("Success", "Report saved!");
+};
 
   return (
     <ScrollView className="flex-1 bg-gray-100 p-4">
@@ -77,7 +93,7 @@ export default function CreateReportScreen() {
 
       </View>
 
-      <TouchableOpacity className="bg-blue-600 rounded-xl p-4 mb-6">
+      <TouchableOpacity onPress={handleSave} className="bg-blue-600 rounded-xl p-4 mb-6">
         <Text className="text-white text-center font-semibold">
           Save Report
         </Text>

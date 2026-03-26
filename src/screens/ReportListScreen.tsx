@@ -1,80 +1,96 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { View, Text, TextInput, TouchableOpacity, FlatList } from "react-native";
-
-const reports = [
-  {
-    id: "1",
-    title: "Safety Audit - Zone 3",
-    description:
-      "Routine weekly safety check for the hazardous materials storage area. Identified minor flooring issue.",
-    date: "Today",
-    images: 2,
-    status: "Pending",
-  },
-  {
-    id: "2",
-    title: "Site Inspection - Sector A",
-    description:
-      "Final inspection before foundation pouring. All reinforcement bars are verified.",
-    date: "Yesterday",
-    images: 5,
-    status: "Completed",
-  },
-];
+import { getDBConnection } from "../database/connection";
+import { getReports } from "../repositories/reportRepository";
 
 export default function ReportListScreen({ navigation }: any) {
+
+  const [reports, setReports] = useState<any[]>([]);
+
+  useEffect(() => {
+    const loadData = async () => {
+      const db = await getDBConnection();
+      const data = await getReports(db);
+      setReports(data);
+    };
+
+    loadData();
+  }, []);
+
   const renderItem = ({ item }: any) => (
     <TouchableOpacity
-      className="bg-white rounded-xl p-4 mb-4 shadow"
+      style={{
+        backgroundColor: "white",
+        padding: 16,
+        borderRadius: 12,
+        marginBottom: 12,
+        elevation: 3,
+      }}
       onPress={() => navigation.navigate("EditReport")}
     >
-      <View className="flex-row justify-between items-center mb-1">
-        <Text className="font-semibold text-base">{item.title}</Text>
+      <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
+        <Text style={{ fontWeight: "bold", fontSize: 16 }}>
+          {item.title}
+        </Text>
 
-        <View
-          className={`px-2 py-1 rounded ${
-            item.status === "Pending" ? "bg-orange-400" : "bg-green-500"
-          }`}
+        <Text
+          style={{
+            color: "white",
+            backgroundColor:
+              item.status === "Pending" ? "orange" : "green",
+            paddingHorizontal: 8,
+            paddingVertical: 2,
+            borderRadius: 6,
+          }}
         >
-          <Text className="text-white text-xs font-semibold uppercase">
-            {item.status}
-          </Text>
-        </View>
+          {item.status}
+        </Text>
       </View>
 
-      <Text className="text-gray-500 text-sm mb-2">{item.description}</Text>
-
-      <View className="flex-row items-center space-x-4">
-        <Text className="text-gray-400 text-xs">📅 {item.date}</Text>
-        <Text className="text-gray-400 text-xs">🖼 {item.images} images</Text>
-      </View>
+      <Text style={{ color: "gray", marginTop: 4 }}>
+        {item.description}
+      </Text>
     </TouchableOpacity>
   );
 
   return (
-    <View className="flex-1 bg-gray-100 p-4">
+    <View style={{ flex: 1, backgroundColor: "#f1f5f9", padding: 16 }}>
 
-      <View className="flex-row justify-between items-center mb-4">
-        <Text className="text-xl font-bold">Field Reports</Text>
-        <Text className="text-lg">ℹ️</Text>
-      </View>
+      <Text style={{ fontSize: 20, fontWeight: "bold", marginBottom: 10 }}>
+        Field Reports
+      </Text>
 
       <TextInput
         placeholder="Search reports"
-        className="bg-white p-3 rounded-lg mb-4"
+        style={{
+          backgroundColor: "white",
+          padding: 10,
+          borderRadius: 8,
+          marginBottom: 12,
+        }}
       />
 
       <FlatList
         data={reports}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id?.toString()}
         renderItem={renderItem}
       />
 
       <TouchableOpacity
-        className="absolute bottom-6 right-6 bg-blue-600 w-14 h-14 rounded-full items-center justify-center shadow-lg"
-        onPress={() => navigation.navigate("CreateReport")}
+        style={{
+          position: "absolute",
+          bottom: 20,
+          right: 20,
+          backgroundColor: "#2563EB",
+          width: 56,
+          height: 56,
+          borderRadius: 28,
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+        onPress={() => navigation.navigate("Create")}
       >
-        <Text className="text-white text-2xl">+</Text>
+        <Text style={{ color: "white", fontSize: 24 }}>+</Text>
       </TouchableOpacity>
 
     </View>
